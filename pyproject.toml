@@ -4,11 +4,16 @@ version = "0.1.0"
 description = ""
 authors = ["NikolayZemelko <zemelko1989@gmail.com>"]
 readme = "README.md"
+packages = [{include = 'page_analyzer'}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-flask = "^2.2.3"
 
+[tool.poetry.group.dev.dependencies]
+gunicorn = {version = "^20.1.0", python = '>=3.5'}
+flask = {version = "^2.2.3", python = '>=3.7'}
+python-dotenv = {version = "^1.0.0", python = '>=3.8'}
+flake8 = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]
