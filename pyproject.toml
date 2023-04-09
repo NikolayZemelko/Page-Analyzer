@@ -8,9 +8,9 @@ packages = [{include = 'page_analyzer'}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-gunicorn = {version = "^20.1.0", python = '>=3.5'}
-flask = {version = "^2.2.3", python = '>=3.7'}
-python-dotenv = {version = "^1.0.0", python = '>=3.8'}
+gunicorn = "^20.1.0"
+flask = "^2.2.3"
+python-dotenv = "^1.0.0"
 flake8 = "^6.0.0"
 
 [build-system]
