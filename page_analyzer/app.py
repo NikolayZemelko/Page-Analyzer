@@ -1,11 +1,11 @@
 import os
-from flask import Flask, request, render_template, redirect, url_for, flash, get_flashed_messages
+from flask import Flask, request, render_template, redirect, \
+    url_for, flash, get_flashed_messages
 from datetime import datetime
 from page_analyzer.validator import valid_url
 import psycopg2
 from dotenv import load_dotenv
 from psycopg2.extras import DictCursor
-from datetime import date
 
 
 load_dotenv()
@@ -63,7 +63,8 @@ def post_url():
     if not valid:
         flash('Некорректный URL', 'error')
         messages = sorted(get_flashed_messages(with_categories=True),
-                          key=lambda message: message[0] == 'error', reverse=True)
+                          key=lambda message: message[0] == 'error',
+                          reverse=True)
 
         return render_template(
             'index.html',
