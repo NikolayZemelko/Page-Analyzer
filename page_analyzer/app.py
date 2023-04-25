@@ -1,11 +1,12 @@
 import os
+import psycopg2
+
+from psycopg2.extras import DictCursor
 from flask import Flask, request, render_template, redirect, \
     url_for, flash, get_flashed_messages
 from datetime import datetime
 from page_analyzer.validator import valid_url
-import psycopg2
 from dotenv import load_dotenv
-from psycopg2.extras import DictCursor
 
 
 load_dotenv()
@@ -21,17 +22,19 @@ def get_start():
 
 
 @app.route('/urls')
-def get_sites():
+def get_urls():
 
-    urls = dict()
     with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute("SELECT * FROM urls")
-            urls = cur.fetchone()
+            urls_dict = cur.fetchall()
+            sorted_urls_dict = sorted(urls_dict,
+                                      key=lambda url: url[0],
+                                      reverse=True)
 
     return render_template(
         'urls/index.html',
-        urls=urls
+        urls=sorted_urls_dict
     )
 
 
