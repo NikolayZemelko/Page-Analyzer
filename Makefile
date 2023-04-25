@@ -15,4 +15,9 @@ dev:
 
 PORT ?= 8000
 start:
+	myname = $(whoami)
+	sudo -u posgtres createuser --createdb $myname
+	sudo -u posgtres createdb --owner=$myname pageAnalyzerTest
+	createdb pageAnalyzerTest
+	sudo -u postgres psql -c "ALTER USER postgres PASSWORD '!Fromakorise1977';"
 	poetry run gunicorn -w 5 -b 0.0.0.0:$(PORT) page_analyzer.app:app
