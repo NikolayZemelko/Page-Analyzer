@@ -1,4 +1,4 @@
-myname = whoami
+myname = $(whoami)
 
 install:
 	poetry install
