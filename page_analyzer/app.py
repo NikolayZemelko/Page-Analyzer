@@ -26,7 +26,8 @@ def get_urls():
 
     with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute("SELECT * FROM urls")
+            cur.execute("SELECT urls.id AS id, urls.name AS name, MAX(url_checks.created_at) AS date "
+                        "FROM urls JOIN url_checks ON urls.id = url_checks.url_id GROUP BY urls.id;")
             urls_dict = cur.fetchall()
             sorted_urls_dict = sorted(urls_dict,
                                       key=lambda url: url[0],
@@ -49,7 +50,7 @@ def get_url(id):
 
     return render_template(
         'url/index.html',
-        messages=get_flashed_messages(),
+        messages=get_flashed_messages(with_categories=True),
         url=url
     )
 
@@ -59,7 +60,7 @@ def post_url():
 
     url = request.form.get('url')
     if not url:
-        flash('URL обязателен', 'void_form')
+        flash('URL обязателен', 'error')
 
     valid = valid_url(url)
 
@@ -98,3 +99,24 @@ def post_url():
             id = cur.fetchone()[0]
 
     return redirect(url_for('get_url', id=id))
+
+
+@app.route('/urls/<id>/checks', methods=['POST'])
+def get_checks_url(id):
+
+    with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
+        with conn.cursor(cursor_factory=DictCursor) as cur:
+            cur.execute("INSERT INTO url_checks (url_id, created_at) "
+                        "VALUES (%s, %s);", (id, datetime.now(),))
+            conn.commit()
+            cur.execute("SELECT id, created_at FROM url_checks WHERE url_id=%s;", (id,))
+            check = cur.fetchone()
+            cur.execute("SELECT * FROM urls WHERE id=%s", (id,))
+            url = cur.fetchone()
+            flash('Страница успешно проверена', 'success')
+    return render_template(
+        'url/index.html',
+        check=check,
+        messages=get_flashed_messages(with_categories=True),
+        url=url
+    )
