@@ -1,16 +1,23 @@
 import os
-import psycopg2
 
+from dotenv import load_dotenv
+from datetime import datetime
+
+import psycopg2
 from psycopg2.extras import DictCursor
+
 from flask import Flask, request, render_template, redirect, \
     url_for, flash, get_flashed_messages
-from datetime import datetime
+
+import requests
+
 from page_analyzer.validator import valid_url
-from dotenv import load_dotenv
+from page_analyzer.parseUrldata import parse_url_data
 
 
 load_dotenv()
 app = Flask(__name__)
+DATABASE_URL = os.getenv('DATABASE_URL')
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 
@@ -24,18 +31,22 @@ def get_start():
 @app.route('/urls')
 def get_urls():
 
-    with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
+    with psycopg2.connect(DATABASE_URL) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute("SELECT urls.id AS id, urls.name AS name, MAX(url_checks.created_at) AS date "
-                        "FROM urls JOIN url_checks ON urls.id = url_checks.url_id GROUP BY urls.id;")
-            urls_dict = cur.fetchall()
-            sorted_urls_dict = sorted(urls_dict,
-                                      key=lambda url: url[0],
-                                      reverse=True)
+            cur.execute("SELECT DISTINCT ON (url_id) "
+                        "urls.id AS id, "
+                        "urls.name AS name, "
+                        "url_checks.created_at AS date, "
+                        "url_checks.status_code AS status_code "
+                        "FROM urls "
+                        "LEFT JOIN url_checks "
+                        "ON urls.id = url_checks.url_id "
+                        "ORDER BY url_id DESC, url_checks.id DESC;")
+            urls = cur.fetchall()
 
     return render_template(
         'urls/index.html',
-        urls=sorted_urls_dict
+        urls=urls
     )
 
 
@@ -47,11 +58,15 @@ def get_url(id):
         with conn.cursor(cursor_factory=DictCursor) as cur:
             cur.execute("SELECT * FROM urls WHERE id=%s", (id,))
             url = cur.fetchone()
+            cur.execute("SELECT * FROM url_checks "
+                        "WHERE url_id=%s ORDER BY id DESC;", (id,))
+            checks = cur.fetchall()
 
     return render_template(
         'url/index.html',
         messages=get_flashed_messages(with_categories=True),
-        url=url
+        url=url,
+        checks=checks
     )
 
 
@@ -101,22 +116,42 @@ def post_url():
     return redirect(url_for('get_url', id=id))
 
 
-@app.route('/urls/<id>/checks', methods=['POST'])
+@app.route('/urls/<id>', methods=['POST'])
 def get_checks_url(id):
 
     with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
-            cur.execute("INSERT INTO url_checks (url_id, created_at) "
-                        "VALUES (%s, %s);", (id, datetime.now(),))
-            conn.commit()
-            cur.execute("SELECT id, created_at FROM url_checks WHERE url_id=%s;", (id,))
-            check = cur.fetchone()
+
             cur.execute("SELECT * FROM urls WHERE id=%s", (id,))
             url = cur.fetchone()
-            flash('Страница успешно проверена', 'success')
+            url_name = url.get('name')
+
+            try:
+                r = requests.get(url_name)
+                url_data = parse_url_data(url_name)
+
+                h1 = url_data.get('h1')
+                title = url_data.get('title')
+                desc = url_data.get('description')
+                status_code = r.status_code
+
+                cur.execute("INSERT INTO url_checks "
+                            "(url_id, created_at, status_code, h1, title, description) "  # noqa E501
+                            "VALUES (%s, %s, %s, %s, %s, %s);",
+                            (id, datetime.now(), status_code, h1, title, desc))
+                conn.commit()
+                cur.execute("SELECT * FROM url_checks "
+                            "WHERE url_id=%s ORDER BY id DESC;", (id,))
+                checks = cur.fetchall()
+
+                flash('Страница успешно проверена', 'success')
+            except requests.ConnectionError:
+                checks = None
+                flash('Произошла ошибка при проверке', 'error')
+
     return render_template(
         'url/index.html',
-        check=check,
+        checks=checks,
         messages=get_flashed_messages(with_categories=True),
         url=url
     )
