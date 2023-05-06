@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS urls;
 DROP TABLE IF EXISTS url_checks;
+DROP TABLE IF EXISTS urls;
 
 CREATE TABLE urls (
     id bigint PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -15,4 +15,4 @@ CREATE TABLE url_checks (
     title varchar(255),
     description varchar(255),
     created_at timestamp
-)
+);
