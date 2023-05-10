@@ -13,4 +13,3 @@ def parse_url(s):
 
 def valid_url(s):
     return url(s)
-
