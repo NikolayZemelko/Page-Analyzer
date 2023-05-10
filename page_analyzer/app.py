@@ -11,7 +11,7 @@ from flask import Flask, request, render_template, redirect, \
 
 import requests
 
-from page_analyzer.normalizeUrl import valid_url, parse_url
+from page_analyzer.checkUrl import valid_url, normalize_url
 from page_analyzer.parseUrlData import parse_url_data
 
 
@@ -74,14 +74,14 @@ def get_url(id):
 def post_url():
 
     url = request.form.get('url')
-    parsed_url = parse_url(url)
+    normalized_url = normalize_url(url)
 
-    if not parsed_url:
+    if not normalized_url:
         flash('URL обязателен', 'error')
 
-    valid = valid_url(parsed_url)
+    validated_url = valid_url(normalized_url)
 
-    if not valid:
+    if not validated_url:
         flash('Некорректный URL', 'error')
         messages = sorted(get_flashed_messages(with_categories=True),
                           key=lambda message: message[0] == 'error',
@@ -95,13 +95,13 @@ def post_url():
     with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
 
-            cur.execute("SELECT * FROM urls WHERE name=%s", (parsed_url,))
+            cur.execute("SELECT * FROM urls WHERE name=%s", (normalized_url,))
             already_exist = cur.fetchone()
 
             if not already_exist:
                 cur.execute("INSERT INTO urls (name, created_at) "
                             "VALUES (%s, %s);",
-                            (parsed_url, datetime.now()))
+                            (normalized_url, datetime.now()))
                 conn.commit()
 
                 with open('./database.sql', 'a') as database_sql:
@@ -112,7 +112,7 @@ def post_url():
 
                 flash('Страница уже существует', 'message')
 
-            cur.execute('SELECT id FROM urls WHERE name=%s', (parsed_url,))
+            cur.execute('SELECT id FROM urls WHERE name=%s', (normalized_url,))
             id = cur.fetchone()[0]
 
     return redirect(url_for('get_url', id=id))
