@@ -11,8 +11,8 @@ from flask import Flask, request, render_template, redirect, \
 
 import requests
 
-from page_analyzer.validator import valid_url
-from page_analyzer.parseUrldata import parse_url_data
+from page_analyzer.normalizeUrl import valid_url, parse_url
+from page_analyzer.parseUrlData import parse_url_data
 
 
 load_dotenv()
@@ -74,10 +74,12 @@ def get_url(id):
 def post_url():
 
     url = request.form.get('url')
-    if not url:
+    parsed_url = parse_url(url)
+
+    if not parsed_url:
         flash('URL обязателен', 'error')
 
-    valid = valid_url(url)
+    valid = valid_url(parsed_url)
 
     if not valid:
         flash('Некорректный URL', 'error')
@@ -93,13 +95,13 @@ def post_url():
     with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
 
-            cur.execute("SELECT * FROM urls WHERE name=%s", (url,))
+            cur.execute("SELECT * FROM urls WHERE name=%s", (parsed_url,))
             already_exist = cur.fetchone()
 
             if not already_exist:
                 cur.execute("INSERT INTO urls (name, created_at) "
                             "VALUES (%s, %s);",
-                            (url, datetime.now()))
+                            (parsed_url, datetime.now()))
                 conn.commit()
 
                 with open('./database.sql', 'a') as database_sql:
@@ -110,7 +112,7 @@ def post_url():
 
                 flash('Страница уже существует', 'message')
 
-            cur.execute('SELECT id FROM urls WHERE name=%s', (url,))
+            cur.execute('SELECT id FROM urls WHERE name=%s', (parsed_url,))
             id = cur.fetchone()[0]
 
     return redirect(url_for('get_url', id=id))
