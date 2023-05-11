@@ -22,5 +22,3 @@ def valid_url(s):
             has_sub_domain = len(fragmented_url.hostname.split('.')) > 2
 
             return has_scheme and has_sub_domain
-
-
