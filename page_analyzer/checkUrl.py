@@ -1,14 +1,5 @@
 import validators
 from urllib.parse import urlparse
-import requests
-
-
-def check_request_url(s):
-    try:
-        requests.get(s)
-        return True
-    except requests.RequestException:
-        return False
 
 
 def normalize_url(s):
