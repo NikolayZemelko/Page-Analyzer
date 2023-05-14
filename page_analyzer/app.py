@@ -76,6 +76,7 @@ def post_url():
     url = request.form.get('url')
     normalized_url = normalize_url(url)
     existing_url = check_request_url(normalized_url)
+
     if not normalized_url:
         flash('URL обязателен', 'error')
 
@@ -90,7 +91,7 @@ def post_url():
         return render_template(
             'index.html',
             messages=messages,
-        )
+        ), 422
 
     with psycopg2.connect(os.getenv('DATABASE_URL')) as conn:
         with conn.cursor(cursor_factory=DictCursor) as cur:
@@ -115,7 +116,7 @@ def post_url():
             cur.execute('SELECT id FROM urls WHERE name=%s', (normalized_url,))
             id = cur.fetchone()[0]
 
-    return redirect(url_for('get_url', id=id))
+    return redirect(url_for('get_url', id=id)), 200
 
 
 @app.route('/urls/<id>', methods=['POST'])

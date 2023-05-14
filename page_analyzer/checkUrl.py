@@ -5,7 +5,7 @@ import requests
 
 def check_request_url(s):
     try:
-        r = requests.get(s)
+        requests.get(s)
         return True
     except requests.RequestException:
         return False
