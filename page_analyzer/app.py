@@ -11,7 +11,7 @@ from flask import Flask, request, render_template, redirect, \
 
 import requests
 
-from page_analyzer.checkUrl import valid_url, normalize_url
+from page_analyzer.checkUrl import valid_url, normalize_url, check_request_url
 from page_analyzer.parseUrlData import parse_url_data
 
 
@@ -75,13 +75,13 @@ def post_url():
 
     url = request.form.get('url')
     normalized_url = normalize_url(url)
-
+    existing_url = check_request_url(normalized_url)
     if not normalized_url:
         flash('URL обязателен', 'error')
 
     validated_url = valid_url(normalized_url)
 
-    if not validated_url:
+    if not validated_url or not existing_url:
         flash('Некорректный URL', 'error')
         messages = sorted(get_flashed_messages(with_categories=True),
                           key=lambda message: message[0] == 'error',

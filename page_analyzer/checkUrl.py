@@ -1,5 +1,14 @@
 import validators
 from urllib.parse import urlparse
+import requests
+
+
+def check_request_url(s):
+    try:
+        r = requests.get(s)
+        return True
+    except requests.RequestException:
+        return False
 
 
 def normalize_url(s):
@@ -19,6 +28,5 @@ def valid_url(s):
         if validators.url(s):
             fragmented_url = urlparse(s)
             has_scheme = fragmented_url.scheme
-            has_sub_domain = len(fragmented_url.hostname.split('.')) > 2
 
-            return has_scheme and has_sub_domain
+            return has_scheme
