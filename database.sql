@@ -16,5 +16,3 @@ CREATE TABLE url_checks (
     description varchar(255),
     created_at timestamp
 );
-
-INSERT INTO urls (name, created_at) VALUES ('http://page.com', '2023-05-14T14:52:49.103702'::timestamp);
