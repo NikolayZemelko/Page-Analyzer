@@ -147,7 +147,7 @@ def get_checks_url(id):
                 checks = cur.fetchall()
 
                 flash('Страница успешно проверена', 'success')
-            except requests.ConnectionError:
+            except (requests.HTTPError, requests.ConnectionError):
                 checks = None
                 flash('Произошла ошибка при проверке', 'error')
 
