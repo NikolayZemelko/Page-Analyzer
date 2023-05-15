@@ -114,6 +114,7 @@ def post_url():
 
             cur.execute('SELECT id FROM urls WHERE name=%s', (normalized_url,))
             id = cur.fetchone()[0]
+            print(id)
 
     return redirect(url_for('get_url', id=id))
 
