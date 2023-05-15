@@ -130,6 +130,7 @@ def get_checks_url(id):
 
             try:
                 r = requests.get(url_name)
+                r.raise_for_status()
                 url_data = parse_url_data(url_name)
 
                 h1 = url_data.get('h1')
