@@ -15,4 +15,4 @@ def parse_url_data(url):
         'h1': h1,
         'title': title,
         'description': content
-        }
+    }
