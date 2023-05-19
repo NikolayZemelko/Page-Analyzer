@@ -30,10 +30,7 @@ Requirments installed and configured:
 
 1. Clone this repository.
 2. Add `.env` file into project root.
-3. Add Environment Variables DATABASE_URL and SECRET_KEY into the `.env` file. 
-`DATABASE_URL variable format: {provider}://{user}:{password}@{host}:{port}/{db}` 
-`DATABASE_URL=postgresql://janedoe:mypassword@localhost:5432/mydb`
-`SECRET_KEY=*any reliable sequence*`
+3. Add Environment Variables DATABASE_URL and SECRET_KEY into the `.env` file.
 4. Install dependecies: `make install`.
 5. Run for developer: `make dev`.
 6. Run for production: `make start`.
