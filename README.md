@@ -10,7 +10,7 @@
 
  - [Stack](https://github.com/NikolayZemelko/python-project-83#stack)
  - [Setup](https://github.com/NikolayZemelko/python-project-83#setup)
- - 
+
 ## Stack
  - Flask (Developer server)
  - Gunicorn (Production server)
