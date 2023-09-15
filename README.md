@@ -1,8 +1,9 @@
-### Hexlet tests and linter status:  
+## Hexlet tests and linter status:  
 [![Actions Status](https://github.com/NikolayZemelko/python-project-83/workflows/hexlet-check/badge.svg)](https://github.com/NikolayZemelko/python-project-83/actions)  
 [![Actions Status](https://github.com/NikolayZemelko/python-project-83/workflows/main-check/badge.svg)](https://github.com/NikolayZemelko/python-project-83/actions)  
 [![Maintainability](https://api.codeclimate.com/v1/badges/594e0c67d9bc329208a4/maintainability)](https://codeclimate.com/github/NikolayZemelko/python-project-83/maintainability)  
-  **Pages Analyser** is a web application for checking the availability of URLs. The application keeps a history of checks.
+
+**Pages Analyser** is a web application for checking the availability of URLs. The application keeps a history of checks.
   
 [https://python-project-83-production-7eef.up.railway.app](https://python-project-83-production-7eef.up.railway.app)
 
@@ -25,14 +26,20 @@
 
 ## Setup
 
-Requirments installed and configured:
-- PostgreSQL
-- Python
-- Poetry
+```shell
+$ git clone https://github.com/NikolayZemelko/Page-Analyzer.git
+```
 
-1. Clone this repository.
-2. Add `.env` file into project root.
-3. Add Environment Variables DATABASE_URL and SECRET_KEY into the `.env` file.
-4. Install dependecies: `make install`.
-5. Run for developer: `make dev`.
-6. Run for production: `make start`.
+When cloning app repository, you may need to install Make for run short console-commands described below.
+
+```
+make install   # install poetry for dependency management
+```
+```
+make dev   # starts the app on the local server in the development environment
+```
+```
+make start   # start the app in the production environment
+```
+```
+make db-reset   # allow clean and reset local database
